@@ -9,10 +9,14 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.provider.Settings;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -44,6 +48,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LatLng currentLocationLatLong;
     private DatabaseReference mDatabase;
 
+    private FloatingActionButton btn_plus, btn_b1, btn_b2, btn_b3;
+    private Animation animeOpen, animeClose, animeRotation, animeReverse;
+    boolean isOpen = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +64,49 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         startGettingLocations();
         mDatabase = FirebaseDatabase.getInstance().getReference();
         getMarkers();
+
+        //Add buttons for trucks
+        btn_plus = (FloatingActionButton) findViewById(R.id.floatingActionButton);
+        btn_b1 = (FloatingActionButton) findViewById(R.id.btn_buzufba1);
+        btn_b2 = (FloatingActionButton) findViewById(R.id.btn_buzufba2);
+        btn_b3 = (FloatingActionButton) findViewById(R.id.btn_buzufba3);
+
+        //Add animations to show buttons
+        animeOpen = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.float_button_open);
+        animeClose = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.float_button_close);
+        animeRotation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.rotation_clock);
+        animeReverse = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.rotation_reverse);
+
+        btn_plus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (isOpen){
+
+                    btn_b1.startAnimation(animeClose);
+                    btn_b2.startAnimation(animeClose);
+                    btn_b3.startAnimation(animeClose);
+                    btn_plus.startAnimation(animeReverse);
+                    btn_b1.setClickable(false);
+                    btn_b2.setClickable(false);
+                    btn_b3.setClickable(false);
+                    isOpen = false;
+
+
+                } else {
+
+                    btn_b1.startAnimation(animeOpen);
+                    btn_b2.startAnimation(animeOpen);
+                    btn_b3.startAnimation(animeOpen);
+                    btn_plus.startAnimation(animeRotation);
+                    btn_b1.setClickable(true);
+                    btn_b2.setClickable(true);
+                    btn_b3.setClickable(true);
+                    isOpen = true;
+
+                }
+            }
+        });
+
     }
 
 
