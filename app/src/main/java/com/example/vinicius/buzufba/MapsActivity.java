@@ -4,6 +4,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -17,6 +21,7 @@ import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -48,9 +53,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LatLng currentLocationLatLong;
     private DatabaseReference mDatabase;
 
+    private Button btn_share_location;
     private FloatingActionButton btn_plus, btn_b1, btn_b2, btn_b3;
     private Animation animeOpen, animeClose, animeRotation, animeReverse;
     boolean isOpen = false;
+
+    private int buzufbaMarkerType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +78,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         btn_b1 = (FloatingActionButton) findViewById(R.id.btn_buzufba1);
         btn_b2 = (FloatingActionButton) findViewById(R.id.btn_buzufba2);
         btn_b3 = (FloatingActionButton) findViewById(R.id.btn_buzufba3);
+        btn_share_location = (Button) findViewById(R.id.button);
 
         //Add animations to show buttons
         animeOpen = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.float_button_open);
@@ -103,6 +112,49 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     btn_b3.setClickable(true);
                     isOpen = true;
 
+                }
+            }
+        });
+
+        btn_b1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (buzufbaMarkerType != 1){
+                    buzufbaMarkerType = 1;
+                    btn_share_location.startAnimation(animeOpen);
+                    btn_b1.setBackgroundTintList(ColorStateList.valueOf(0xFFFF0000));
+                } else {
+                    buzufbaMarkerType = 0;
+                    btn_share_location.startAnimation(animeClose);
+                    btn_b1.setBackgroundTintList(ColorStateList.valueOf(0xFF0000FF));
+
+                }
+            }
+        });
+
+        btn_b2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (buzufbaMarkerType != 2){
+                    buzufbaMarkerType = 2;
+                    btn_b1.startAnimation(animeClose);
+
+                } else {
+                    buzufbaMarkerType = 0;
+                }
+            }
+        });
+
+        btn_b3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (buzufbaMarkerType != 3){
+                    buzufbaMarkerType = 3;
+                    btn_b1.startAnimation(animeClose);
+
+                } else {
+                    buzufbaMarkerType = 0;
+                    mDatabase.child("location").child("id").removeValue();
                 }
             }
         });
@@ -149,7 +201,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         CameraPosition cameraPosition = new CameraPosition.Builder().zoom(10).target(currentLocationLatLong).build();
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
-        LocationData locationData = new LocationData(location.getLatitude(), location.getLongitude());
+        LocationData locationData = new LocationData(location.getLatitude(), location.getLongitude(), buzufbaMarkerType);
         mDatabase.child("location").child(String.valueOf(new Date().getTime())).setValue(locationData);
 
         Toast.makeText(this, "Localização atualizada", Toast.LENGTH_SHORT).show();
@@ -313,6 +365,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         markerOptions.position(latLng);
         markerOptions.title(dt.format(newDate));
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+/*
+        if (buzufbaMarkerType == 1){
+            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+        } else if (buzufbaMarkerType == 2){
+            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+        } else if (buzufbaMarkerType == 3){
+            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+        }
+*/
+
         currentLocationMaker = mMap.addMarker(markerOptions);
     }
 
